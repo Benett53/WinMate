@@ -5,6 +5,24 @@ versions follow [Semantic Versioning](https://semver.org/). The current version 
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-09-20
+
+### Added
+- Bundles are split into **core apps** and an **extended selection**. Core apps are preselected, extended apps
+  are optional and start unticked; both bundle pages and the bundle dialog show the two groups separately.
+
+### Changed
+- The website generates **install scripts only**. Update mode, uninstall mode, dry run, the System Restore point
+  and the proxy setting were removed from the site, the engine and `winmate.ps1`. Version pinning remains.
+- Undo scripts are still written after every install run and remove only the apps that run installed.
+- Categories are listed **alphabetically** in the language of the page; apps inside a category are ordered by a
+  maintained ranking, best first.
+- Texts on the website and in the repository were rewritten to a neutral, factual tone in English and German.
+- Bundles now carry a minimal core, so a bundle no longer selects a dozen apps by default.
+
+### Removed
+- `-Mode`, `-DryRun`, `-RestorePoint` and `-Proxy` in `winmate.ps1`; the matching options in the script dialog.
+
 ## [2.2.0] - 2026-09-14
 
 ### Added
@@ -52,5 +70,6 @@ versions follow [Semantic Versioning](https://semver.org/). The current version 
 
 - First version: 181 apps, script download as ZIP.
 
-[Unreleased]: https://github.com/baba537/WinMate/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/baba537/WinMate/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/baba537/WinMate/releases/tag/v2.3.0
 [2.2.0]: https://github.com/baba537/WinMate/releases/tag/v2.2.0

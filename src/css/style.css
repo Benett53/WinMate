@@ -396,7 +396,11 @@ kbd {
 .bd-head p { margin: 0; }
 .bd-meta { margin: 1rem 0 .5rem; font-size: .9rem; display: flex; flex-wrap: wrap; gap: .3rem .6rem; align-items: baseline; }
 .bd-meta a { margin-left: auto; }
-.bd-list { list-style: none; margin: 0; padding: .4rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem; overflow-y: auto; max-height: 42vh; background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius); }
+.bd-list { list-style: none; margin: 0; padding: .4rem; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .3rem .9rem; align-items: start; overflow-y: auto; max-height: 42vh; background: var(--bg); border: 2px solid var(--border); border-radius: var(--radius); }
+.bd-col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .2rem; }
+.bd-col-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: .1rem .5rem; margin: .1rem 0 .45rem; padding: 0 .5rem .35rem; border-bottom: 2px solid var(--border); }
+.bd-col-head strong { font: 400 .72rem var(--font-pixel); letter-spacing: .06em; text-transform: uppercase; }
+.bd-col-extra .bd-col-head strong { color: var(--muted); }
 .bd-list label { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: .55rem; padding: .35rem .5rem; border-radius: 4px; cursor: pointer; font-size: .9rem; }
 .bd-text { display: flex; flex-wrap: wrap; align-items: center; gap: .15rem .4rem; min-width: 0; }
 .bd-list label:hover { background: var(--surface-2); }
@@ -517,6 +521,7 @@ kbd {
   .steps { grid-template-columns: 1fr; }
   .app-hero { grid-template-columns: 1fr; }
   .bd-list { grid-template-columns: 1fr; }
+  .bd-col + .bd-col { margin-top: .5rem; }
   .selbar-bundles, .selbar-actions .btn-ghost, .selbar kbd, .selbar-text .small { display: none; }
   .dialog { padding: 1.1rem; }
   .dlg-actions .btn, .dlg-actions .btn-ghost { flex: 1 1 100%; }
@@ -531,10 +536,6 @@ kbd {
 /* ---------------------------------------------------------------- script options, profiles, trust */
 .dlg-options { display: grid; gap: .55rem; margin: 0 0 1rem; padding: .8rem .9rem 1rem; border: 2px solid var(--border); border-radius: var(--radius); background: var(--bg); }
 .dlg-options legend { padding: 0 .4rem; font: 400 .72rem var(--font-pixel); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
-.seg-mode { margin-bottom: .2rem; }
-.opt-proxy { display: grid; gap: .25rem; font-size: .88rem; color: var(--muted); }
-.opt-proxy input { font: inherit; color: var(--text); background: var(--surface); border: 2px solid var(--border-strong); border-radius: var(--radius); padding: .45rem .6rem; }
-.opt-proxy input:focus { outline: none; border-color: var(--accent); }
 .engine-info { margin: -.4rem 0 1rem; overflow-wrap: anywhere; }
 .engine-info code { font-size: .8em; }
 .profile-panel p { margin: 0 0 .6rem; }

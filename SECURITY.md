@@ -9,9 +9,9 @@ A user-facing version lives at <https://winmate.baba537.workers.dev/security/>.
 Please **do not open a public issue**. Report privately via
 [GitHub security advisories](https://github.com/baba537/WinMate/security/advisories/new).
 
-- You get a first response within 7 days.
-- Confirmed issues are fixed in a new release; the advisory is published after the fix, with credit if you want it.
-- Wrong or outdated package IDs are not security issues – use the normal [issue tracker](https://github.com/baba537/WinMate/issues).
+- Reports receive a first response within 7 days.
+- Confirmed issues are fixed in a new release; the advisory is published after the fix, with credit on request.
+- Wrong or outdated package IDs are not security issues. Please use the normal [issue tracker](https://github.com/baba537/WinMate/issues).
 
 Supported: only the latest release and the live website.
 
@@ -26,8 +26,8 @@ Supported: only the latest release and the live website.
    only the packages this run newly installed.
 5. Sends no telemetry. The website stores the selection only in the browser's `localStorage`.
 
-Optional behaviour is visible in the configuration block: `$Mode` (install/upgrade/uninstall), `$DryRun`,
-`$RestorePoint`, `$Proxy` and pinned `Version` entries.
+The configuration block shows everything a script does: the package manager, the package list and, if version
+pinning was enabled, a `Version` entry per package. Undo scripts written after an install use `$Mode = 'uninstall'`.
 
 ## Verifying scripts and releases
 
@@ -56,16 +56,16 @@ every GitHub release.
 | Threat | Mitigation | Remaining risk |
 |---|---|---|
 | Website or hosting compromised, modified script served | Open source; reproducible build in public CI; script preview; engine hash + `-Verify` against attested release; strict CSP and security headers | Users running scripts without looking at or verifying them |
-| Package source or manifest compromised | Upstream review, scanning and hash checks; optional version pinning; dry run | A malicious package accepted upstream cannot be detected by WinMate |
+| Package source or manifest compromised | Upstream review, scanning and hash checks; optional version pinning | A malicious package accepted upstream cannot be detected by WinMate |
 | Wrong or malicious ID added to the catalog | PR review; CI validation against official indexes; IDs visible on app pages and in scripts | Reviewer overlooks a look-alike ID |
 | Typosquatting / ambiguous names | Exact IDs and fixed sources instead of name search | Low |
 | Abuse of the elevated session | Single elevation for listed packages; no services or persistent tasks; temporary files deleted | Installers run with full rights by nature |
-| Failed or unwanted installation | Optional restore point, run record, undo script, retry, logs | Undo relies on each app's uninstaller |
+| Failed or unwanted installation | Run record, undo script, one retry, logs | Undo relies on each app's uninstaller |
 | Supply chain of this repository | Minimal dependencies (Python stdlib, no npm); pinned GitHub Actions major versions updated by Dependabot | Compromise of the maintainer account |
 
 ## Known limits
 
 - Scripts are generated per selection in the browser and are therefore **not Authenticode-signed**.
-- **No independent security audit** has been performed yet. Reviews are welcome.
+- **No independent security audit** has been performed. Reviews are welcome.
 - Single maintainer; parts of the project were written with AI assistance. All code is public for review.
 - Not an enterprise deployment tool: no central management, offline mirror or compliance reporting.

@@ -99,18 +99,24 @@
     byId[card.dataset.id] = card;
   });
 
+  function idList(value) {
+    return (value || "").split(",").filter(function (id) { return id && byId[id]; });
+  }
+
   var bundles = {};
   $$("[data-bundle]").forEach(function (tile) {
     bundles[tile.dataset.bundle] = {
       id: tile.dataset.bundle, tile: tile, name: tile.dataset.name, title: tile.dataset.title, intro: tile.dataset.intro,
       group: tile.dataset.group, url: tile.dataset.url, icon: tile.querySelector(".bt-icon").innerHTML,
       groupClass: (tile.className.match(/g-\w+/) || [""])[0],
-      apps: tile.dataset.apps.split(",").filter(function (id) { return byId[id]; })
+      core: idList(tile.dataset.apps),
+      extra: idList(tile.dataset.extra),
+      apps: idList(tile.dataset.apps).concat(idList(tile.dataset.extra))
     };
   });
 
   /* State: apps picked by hand, active bundles, and bundle apps the user deselected. */
-  var DEFAULT_OPTIONS = { mode: "install", dry: false, restore: false, pin: false, proxy: "" };
+  var DEFAULT_OPTIONS = { pin: false };
   var state = { pm: "winget", manual: [], bundles: [], excluded: [], options: JSON.parse(JSON.stringify(DEFAULT_OPTIONS)) };
   var undoState = null;
 
@@ -132,7 +138,6 @@
       Object.keys(DEFAULT_OPTIONS).forEach(function (k) {
         if (typeof saved.options[k] === typeof DEFAULT_OPTIONS[k]) state.options[k] = saved.options[k];
       });
-      if (["install", "upgrade", "uninstall"].indexOf(state.options.mode) < 0) state.options.mode = "install";
     }
   }
   function save() { store.set(STORE_KEY, JSON.stringify(state)); }
@@ -410,14 +415,32 @@
 
     var list = $("#bdList");
     list.textContent = "";
+    var columns = {};
+    [["core", L.bundle_core, L.bundle_core_hint], ["extra", L.bundle_extra, L.bundle_extra_hint]].forEach(function (col) {
+      if (!b[col[0]].length) return;
+      var section = document.createElement("div");
+      section.className = "bd-col bd-col-" + col[0];
+      var head = document.createElement("p");
+      head.className = "bd-col-head";
+      var strong = document.createElement("strong");
+      strong.textContent = col[1];
+      var hint = document.createElement("span");
+      hint.className = "small muted"; hint.textContent = col[2];
+      head.appendChild(strong); head.appendChild(hint);
+      var ul = document.createElement("ul");
+      section.appendChild(head); section.appendChild(ul);
+      list.appendChild(section);
+      columns[col[0]] = ul;
+    });
     b.apps.forEach(function (appId) {
       var card = byId[appId];
       var own = state.manual.indexOf(appId) >= 0;
+      var isExtra = b.extra.indexOf(appId) >= 0;
       var li = document.createElement("li");
       var label = document.createElement("label");
       var input = document.createElement("input");
       input.type = "checkbox"; input.value = appId;
-      input.checked = own || !(active && state.excluded.indexOf(appId) >= 0);
+      input.checked = own || (active ? state.excluded.indexOf(appId) < 0 : !isExtra);
       input.disabled = own;
       input.addEventListener("change", updateBundleCount);
       var tile = document.createElement("span");
@@ -442,7 +465,7 @@
         text.appendChild(tag);
       });
       li.appendChild(label);
-      list.appendChild(li);
+      columns[isExtra ? "extra" : "core"].appendChild(li);
     });
     updateBundleCount();
 
@@ -519,12 +542,11 @@
       }
     });
     var today = new Date().toISOString().slice(0, 10);
-    var label = { install: "install", upgrade: "update", uninstall: "uninstall" }[opts.mode];
     // Keep this format in sync with src/ps/cli.ps1 (winmate.ps1 -Verify reads the markers).
     return [
       "# ============================================================================",
-      "#  WinMate " + VERSION + " " + label + " script - " + SITE_URL,
-      "#  Generated " + today + " - " + entries.length + " package(s) with " + PM_LABEL[pm] + (opts.dry ? " (dry run)" : ""),
+      "#  WinMate " + VERSION + " install script - " + SITE_URL,
+      "#  Generated " + today + " - " + entries.length + " package(s) with " + PM_LABEL[pm],
       "#  Engine SHA-256: " + ENGINE_SHA256,
       "#  Verify: winmate.ps1 -Verify <file>   Details: " + SITE_URL + "/security/",
       "#  Run: double-click the .cmd file, or paste this script into PowerShell.",
@@ -533,10 +555,7 @@
       "    param([string]$Phase, [string]$ResultFile, [switch]$NoPause, [string]$RunId)",
       "    # >>> config",
       "    $PackageManager = " + ps(pm),
-      "    $Mode = " + ps(opts.mode),
-      "    $DryRun = " + (opts.dry ? "$true" : "$false"),
-      "    $RestorePoint = " + (opts.restore ? "$true" : "$false"),
-      "    $Proxy = " + ps(opts.proxy.trim()),
+      "    $Mode = 'install'",
       "    $Buckets = @(" + buckets.map(ps).join(", ") + ")",
       "    $Apps = @(",
       entries.join("\n"),
@@ -568,10 +587,7 @@
     return JSON.stringify(out, null, 2) + "\n";
   }
 
-  function fileBase() {
-    var o = state.options;
-    return "WinMate-" + (o.dry ? "DryRun-" : "") + { install: "Install", upgrade: "Update", uninstall: "Uninstall" }[o.mode];
-  }
+  function fileBase() { return "WinMate-Install"; }
 
   function cmdWrapper(script) {
     var head = [
@@ -614,12 +630,7 @@
   function names(list) { return list.map(function (c) { return c.dataset.name; }).join(", "); }
 
   function renderOptions() {
-    var o = state.options;
-    $$("[data-mode]").forEach(function (b) { b.setAttribute("aria-checked", String(b.dataset.mode === o.mode)); });
-    $("#optDry").checked = o.dry;
-    $("#optRestore").checked = o.restore;
-    $("#optPin").checked = o.pin;
-    if (document.activeElement !== $("#optProxy")) $("#optProxy").value = o.proxy;
+    $("#optPin").checked = state.options.pin;
     $("#dlCmdLabel").textContent = L.dl_cmd_label.replace("{file}", fileBase() + ".cmd");
     $("#dlWingetJson").hidden = state.pm !== "winget";
   }
@@ -635,7 +646,6 @@
     var o = state.options;
     renderOptions();
     var warnings = [];
-    if (o.mode === "uninstall" && !o.dry) warnings.push(["warn", L.warn_uninstall]);
     if (o.pin && state.pm === "scoop") warnings.push(["info", L.warn_pin_scoop]);
     if (o.pin && state.pm !== "scoop") {
       var unpinned = sel.apps.filter(function (c) {
@@ -664,20 +674,14 @@
     });
     var hasApps = sel.apps.length > 0;
     $("#dlgSummary").textContent = hasApps
-      ? fmt(L.summary_mode[o.mode], { n: sel.apps.length, pm: PM_LABEL[state.pm] }) + (o.dry ? L.dry_suffix : "")
+      ? fmt(L.summary_install, { n: sel.apps.length, pm: PM_LABEL[state.pm] })
       : fmt(L.nothing_for_pm, { pm: PM_LABEL[state.pm] });
     ["#dlCmd", "#copyPs", "#dlPs", "#dlWingetJson"].forEach(function (s) { $(s).disabled = !hasApps; });
     current = currentScript();
     $("#scriptPreview").textContent = current;
   }
 
-  $$("[data-mode]").forEach(function (btn) {
-    btn.addEventListener("click", function () { state.options.mode = btn.dataset.mode; save(); refreshScript(); });
-  });
-  [["#optDry", "dry"], ["#optRestore", "restore"], ["#optPin", "pin"]].forEach(function (pair) {
-    $(pair[0]).addEventListener("change", function (e) { state.options[pair[1]] = e.target.checked; save(); refreshScript(); });
-  });
-  $("#optProxy").addEventListener("input", function (e) { state.options.proxy = e.target.value; save(); refreshScript(); });
+  $("#optPin").addEventListener("change", function (e) { state.options.pin = e.target.checked; save(); refreshScript(); });
 
   function copyScript() {
     var text = currentScript();

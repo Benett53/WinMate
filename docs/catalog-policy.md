@@ -26,6 +26,14 @@ Paid apps are allowed when they are widely used; descriptions mention subscripti
 - `noAdmin` is set only when a winget manifest declares `ElevationRequirement: elevationProhibited`.
 - Apps with several packages (e.g. Visual C++ 2005–2022) list all IDs explicitly.
 
+## Order in the catalog
+
+Categories are sorted alphabetically by their display name, per language. Inside a category the order in
+`data/apps.json` is a ranking: the app that serves most people best comes first, niche or weaker options come
+last. The ranking is maintained by hand and weighs general usefulness, reliability, active maintenance and,
+between otherwise equal options, open source and a lack of adware or nag screens. A bundle lists a minimal set
+of core apps in `apps` and optional additions in `extra`.
+
 ## Icons
 
 Every icon has a reproducible source in `data/apps.json` (official Flathub icon, dashboard-icons, vendor

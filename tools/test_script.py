@@ -81,14 +81,14 @@ def main():
     r = cli("-List -Search firefox")
     check("winmate.ps1 -List -Search", r.returncode == 0 and "firefox" in r.stdout, r.stdout + r.stderr)
 
-    r = cli("-Apps does-not-exist -DryRun")
+    r = cli("-Apps does-not-exist")
     check("unknown app is rejected", r.returncode == 1 and "Unknown app" in r.stdout, r.stdout + r.stderr)
 
     exports = {
-        "winget-install": "-Apps firefox,whatsapp,spotify,vcredist -PinVersions -RestorePoint",
-        "winget-dryrun": "-Bundle gaming -DryRun",
-        "scoop-upgrade": "-Apps 7zip,vlc -PackageManager scoop -Mode upgrade",
-        "choco-uninstall": "-Apps 7zip -PackageManager choco -Mode uninstall -Proxy http://proxy:8080",
+        "winget-install": "-Apps firefox,whatsapp,spotify,vcredist -PinVersions",
+        "winget-bundle": "-Bundle gaming",
+        "scoop-install": "-Apps 7zip,vlc -PackageManager scoop",
+        "choco-install": "-Apps 7zip -PackageManager choco",
     }
     for name, args in exports.items():
         out = tmp / f"{name}.ps1"
@@ -123,7 +123,7 @@ def main():
     check("undo script generated", undo.exists(), r.stdout + r.stderr)
     if undo.exists():
         undo_text = undo.read_text(encoding="utf-8")
-        check("undo script uses uninstall mode", "$Mode = 'uninstall'" in undo_text and "$RestorePoint = $false" in undo_text, undo_text[:1500])
+        check("undo script uses uninstall mode", "$Mode = 'uninstall'" in undo_text, undo_text[:1500])
         check("undo script keeps no pinned versions", "Version = '" not in undo_text.split("# <<< config")[0], undo_text[:1500])
         errors = parse_errors(undo)
         check("parse undo script", not errors, errors)
@@ -134,13 +134,9 @@ def main():
     check("website generator uses the same markers", all(m in js for m in ("# >>> config", "# <<< config", "# >>> engine", "# <<< engine", info["engineSha256"])))
 
     if "--run" in sys.argv:
-        r = cli("-Apps 7zip,firefox -DryRun -NoPause")
-        check("CLI dry run", r.returncode == 0 and "Dry run finished" in r.stdout, r.stdout + r.stderr)
-
         base = (tmp / "winget-install.ps1").read_text(encoding="utf-8-sig")
         run = replace_apps(base, ["Name = 'VC++ 2012 x64'; Id = 'Microsoft.VCRedist.2012.x64'; NoAdmin = $true",
                                   "Name = 'Does not exist'; Id = 'WinMate.DoesNotExist'; NoAdmin = $true"])
-        run = run.replace("$RestorePoint = $true", "$RestorePoint = $false")
         main_file = tmp / "run-main.ps1"
         main_file.write_text(run.rstrip()[:-1] + "} -NoPause -RunId 'test-main'\n", encoding="utf-8-sig")
         r = ps(f"& '{main_file}'")

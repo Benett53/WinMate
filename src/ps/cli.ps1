@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    WinMate command line: install, update or remove Windows apps from the WinMate catalog.
+    WinMate command line: install apps from the WinMate catalog.
 
 .DESCRIPTION
     Uses exactly the same engine as the scripts generated on the website. The app catalog is
@@ -12,16 +12,16 @@
     Lists catalog apps that match "browser".
 
 .EXAMPLE
-    .\winmate.ps1 -Apps firefox,vlc,7zip -DryRun
-    Shows what would be installed without changing anything.
+    .\winmate.ps1 -Apps firefox,vlc,7zip
+    Installs three apps with winget.
 
 .EXAMPLE
-    .\winmate.ps1 -Bundle gaming -RestorePoint
-    Installs the Gaming PC bundle with winget after creating a restore point.
+    .\winmate.ps1 -Bundle gaming -PackageManager scoop
+    Installs the Gaming PC bundle with Scoop.
 
 .EXAMPLE
-    .\winmate.ps1 -ProfilePath .\winmate-profile.json -Mode upgrade
-    Updates every app of a profile exported from the website.
+    .\winmate.ps1 -ProfilePath .\winmate-profile.json
+    Installs a selection exported from the website.
 
 .EXAMPLE
     .\winmate.ps1 -Verify .\WinMate-Install.cmd
@@ -40,11 +40,7 @@ param(
     [string[]]$Bundle,
     [string]$ProfilePath,
     [ValidateSet('winget', 'scoop', 'choco')][string]$PackageManager,
-    [ValidateSet('install', 'upgrade', 'uninstall')][string]$Mode = 'install',
-    [switch]$DryRun,
-    [switch]$RestorePoint,
     [switch]$PinVersions,
-    [string]$Proxy = '',
     [switch]$NoPause,
     [string]$ExportScript,
     [switch]$List,
@@ -124,7 +120,7 @@ if ($Logs) {
     $records = @($runs | Select-Object -First 15 | ForEach-Object { Get-Content $_.FullName -Raw -Encoding UTF8 | ConvertFrom-Json })
     $records | ForEach-Object {
         [pscustomobject]@{
-            Run = $_.id; Mode = $(if ($_.dryRun) { "$($_.mode) (dry run)" } else { $_.mode }); Manager = $_.packageManager
+            Run = $_.id; Mode = $_.mode; Manager = $_.packageManager
             Apps = @($_.results).Count; Failed = @($_.results | Where-Object { $_.Status -eq 'failed' }).Count
         }
     } | Format-Table -AutoSize
@@ -228,11 +224,10 @@ foreach ($id in $ordered) {
 if ($skipped.Count) { Write-Host "Not available for ${pm}, skipped: $($skipped -join ', ')" -ForegroundColor Yellow }
 if (-not $entries.Count) { Write-Host "None of the selected apps is available for $pm." -ForegroundColor Red; exit 1 }
 
-$label = @{ install = 'install'; upgrade = 'update'; uninstall = 'uninstall' }[$Mode]
 $lines = @(
     '# ============================================================================',
-    "#  WinMate $WinMateVersion $label script - $SiteUrl",
-    "#  Generated $(Get-Date -Format 'yyyy-MM-dd') by winmate.ps1 - $($entries.Count) package(s) with $pm$(if ($DryRun) { ' (dry run)' })",
+    "#  WinMate $WinMateVersion install script - $SiteUrl",
+    "#  Generated $(Get-Date -Format 'yyyy-MM-dd') by winmate.ps1 - $($entries.Count) package(s) with $pm",
     "#  Engine SHA-256: $EngineSha256",
     "#  Verify: winmate.ps1 -Verify <file>   Details: $SiteUrl/security/",
     '# ============================================================================',
@@ -240,10 +235,7 @@ $lines = @(
     '    param([string]$Phase, [string]$ResultFile, [switch]$NoPause, [string]$RunId)',
     '    # >>> config',
     "    `$PackageManager = $(ConvertTo-PsLiteral $pm)",
-    "    `$Mode = $(ConvertTo-PsLiteral $Mode)",
-    "    `$DryRun = $(if ($DryRun) { '$true' } else { '$false' })",
-    "    `$RestorePoint = $(if ($RestorePoint) { '$true' } else { '$false' })",
-    "    `$Proxy = $(ConvertTo-PsLiteral $Proxy)",
+    "    `$Mode = 'install'",
     "    `$Buckets = @($(($buckets | ForEach-Object { ConvertTo-PsLiteral $_ }) -join ', '))",
     '    $Apps = @('
 ) + $entries + @(

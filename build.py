@@ -54,6 +54,13 @@ BOOT_JS = ("try{var d=document.documentElement,t=localStorage.getItem('wm-theme'
 
 esc = html.escape
 
+_UMLAUTS = str.maketrans({"ä": "a", "ö": "o", "ü": "u", "ß": "ss", "Ä": "A", "Ö": "O", "Ü": "U"})
+
+
+def alpha(items, lang):
+    """Categories and bundles are listed alphabetically in the language of the page."""
+    return sorted(items, key=lambda i: i[lang]["name"].translate(_UMLAUTS).lower())
+
 
 # ----------------------------------------------------------------------------- data
 def load_data():
@@ -73,8 +80,10 @@ def load_data():
         a["winget"] = [w] if isinstance(w, str) else (w or [])
         a["iconFile"] = icons[a["id"]]
     for p in presets:
-        for aid in p["apps"]:
+        p["extra"] = p.get("extra", [])
+        for aid in p["apps"] + p["extra"]:
             assert aid in app_ids, f"preset {p['id']}: unknown app {aid}"
+        assert not set(p["apps"]) & set(p["extra"]), f"preset {p['id']}: app in both lists"
     by_cat = {c["id"]: [a for a in apps if a["category"] == c["id"]] for c in cats}
     versions_file = DATA / "versions.json"
     versions = json.loads(versions_file.read_text(encoding="utf-8")) if versions_file.exists() else {}
@@ -243,7 +252,7 @@ def header(lang, alt_path, home_page=False):
 
 def footer(lang, cats, presets):
     t = T[lang]
-    cat_links = "".join(f'<li><a href="{url(lang, "category/" + c["id"] + "/")}">{esc(c[lang]["name"])}</a></li>' for c in cats)
+    cat_links = "".join(f'<li><a href="{url(lang, "category/" + c["id"] + "/")}">{esc(c[lang]["name"])}</a></li>' for c in alpha(cats, lang))
     preset_links = "".join(f'<li><a href="{url(lang, "bundle/" + p["id"] + "/")}">{esc(p[lang]["name"])}</a></li>' for p in presets)
     return f"""<footer class="site-footer">
   <div class="wrap footer-grid">
@@ -366,7 +375,7 @@ def bundle_sidebar(lang, presets):
     groups = []
     for g in BUNDLE_GROUPS:
         tiles = "".join(
-            f'<li><button type="button" class="bundle-tile g-{g}" data-bundle="{p["id"]}" data-apps="{",".join(p["apps"])}" '
+            f'<li><button type="button" class="bundle-tile g-{g}" data-bundle="{p["id"]}" data-apps="{",".join(p["apps"])}" data-extra="{",".join(p["extra"])}" '
             f'data-name="{esc(p[lang]["name"])}" data-title="{esc(p[lang]["title"])}" data-intro="{esc(p[lang]["intro"])}" '
             f'data-group="{esc(t["bundle_groups"][g])}" data-url="{url(lang, "bundle/" + p["id"] + "/")}" aria-haspopup="dialog">'
             f'<span class="bt-icon">{pixel.svg(p["icon"])}</span><span class="bt-name">{esc(p[lang]["name"])}</span>'
@@ -379,6 +388,7 @@ def bundle_sidebar(lang, presets):
 def home_page(lang, apps, cats, presets, by_cat):
     t = T[lang]
     n = len(apps)
+    cats = alpha(cats, lang)
     cat_nav = "".join(
         f'<li><a href="#cat-{c["id"]}" data-cat-link="{c["id"]}"><span>{esc(c[lang]["name"])}</span><span class="count">{len(by_cat[c["id"]])}</span></a></li>'
         for c in cats)
@@ -485,15 +495,7 @@ def home_page(lang, apps, cats, presets, by_cat):
   <p class="muted" id="dlgSummary"></p>
   <fieldset class="dlg-options">
     <legend>{t['opt_title']}</legend>
-    <div class="segmented seg-mode" role="radiogroup" aria-label="{t['opt_mode']}">
-      <button type="button" role="radio" aria-checked="true" data-mode="install">{t['mode_install']}</button>
-      <button type="button" role="radio" aria-checked="false" data-mode="upgrade">{t['mode_upgrade']}</button>
-      <button type="button" role="radio" aria-checked="false" data-mode="uninstall">{t['mode_uninstall']}</button>
-    </div>
-    <label class="toggle"><input type="checkbox" id="optDry"><span>{t['opt_dry']}</span></label>
-    <label class="toggle"><input type="checkbox" id="optRestore"><span>{t['opt_restore']}</span></label>
     <label class="toggle"><input type="checkbox" id="optPin"><span>{t['opt_pin'].format(date=VERSIONS_CHECKED.get('checked') or '–')}</span></label>
-    <label class="opt-proxy"><span>{t['opt_proxy']}</span><input type="text" id="optProxy" inputmode="url" autocomplete="off" spellcheck="false" placeholder="http://proxy:8080"></label>
   </fieldset>
   <ul class="dlg-warnings" id="dlgWarnings"></ul>
   <div class="dlg-actions">
@@ -673,24 +675,33 @@ def app_page(lang, app, apps, cats, presets, by_cat):
     return page(lang, body, title=title, description=desc, path=path, cats=cats, presets=presets, extra_ld=ld, og_type="article")
 
 
-def list_page(lang, *, kind, item, list_apps, apps, cats, presets, title, h1, intro):
+def list_page(lang, *, kind, item, list_apps, apps, cats, presets, title, h1, intro, extra_apps=()):
     t = T[lang]
     path = f"{kind}/{item['id']}/"
     nav, bc_ld = breadcrumbs(lang, [("WinMate", ""), (h1, None)])
-    rows = []
-    for a in list_apps:
-        cmds = pm_commands(a)
-        first = cmds.get("winget") or cmds.get("scoop") or cmds.get("choco")
-        rows.append(
-            f'<li class="list-app"><a class="list-app-head" href="{url(lang, "apps/" + a["id"] + "/")}">'
-            f'<span class="tile">{icon_img(a)}</span><span><strong>{esc(a["name"])}</strong>'
-            f'<span class="muted small">{esc(a["description"][lang])}</span></span></a>'
-            f'<pre><code>{esc(first)}</code></pre></li>')
+    def app_rows(items):
+        out = []
+        for a in items:
+            cmds = pm_commands(a)
+            first = cmds.get("winget") or cmds.get("scoop") or cmds.get("choco")
+            out.append(
+                f'<li class="list-app"><a class="list-app-head" href="{url(lang, "apps/" + a["id"] + "/")}">'
+                f'<span class="tile">{icon_img(a)}</span><span><strong>{esc(a["name"])}</strong>'
+                f'<span class="muted small">{esc(a["description"][lang])}</span></span></a>'
+                f'<pre><code>{esc(first)}</code></pre></li>')
+        return "".join(out)
+
+    rows = app_rows(list_apps)
+    extra_block = ""
+    if extra_apps:
+        extra_block = (f'<h2 id="extended">{t["bundle_extra_title"]}</h2>'
+                       f'<p class="muted">{t["bundle_extra_intro"]}</p>'
+                       f'<ol class="list-apps">{app_rows(extra_apps)}</ol>')
     ids = ",".join(a["id"] for a in list_apps)
     select_href = f'{url(lang)}?bundle={item["id"]}#apps' if kind == "bundle" else f"{url(lang)}?apps={ids}#apps"
     icon = f'<span class="list-hero-icon g-{item["group"]}">{pixel.svg(item["icon"])}</span>' if kind == "bundle" else ""
     other_lists = (
-        "".join(f'<li><a class="chip" href="{url(lang, "category/" + c["id"] + "/")}">{esc(c[lang]["name"])}</a></li>' for c in cats if c["id"] != item["id"])
+        "".join(f'<li><a class="chip" href="{url(lang, "category/" + c["id"] + "/")}">{esc(c[lang]["name"])}</a></li>' for c in alpha(cats, lang) if c["id"] != item["id"])
         if kind == "category" else
         "".join(f'<li><a class="chip bundle-chip g-{p["group"]}" href="{url(lang, "bundle/" + p["id"] + "/")}">{pixel.svg(p["icon"])} {esc(p[lang]["name"])}</a></li>' for p in presets if p["id"] != item["id"])
     )
@@ -700,15 +711,18 @@ def list_page(lang, *, kind, item, list_apps, apps, cats, presets, title, h1, in
   <header class="list-hero">
     {icon}<h1>{esc(h1)}</h1>
     <p class="lead">{esc(intro)}</p>
-    <p><a class="btn btn-primary" href="{select_href}">{t['select_all_in_winmate'].format(n=len(list_apps))}</a></p>
+    <p><a class="btn btn-primary" href="{select_href}">{t['open_bundle_in_winmate'] if kind == 'bundle' else t['select_all_in_winmate'].format(n=len(list_apps))}</a></p>
   </header>
-  <ol class="list-apps">{''.join(rows)}</ol>
+  {f'<h2>{t["bundle_core_title"]}</h2>' if extra_apps else ''}
+  <ol class="list-apps">{rows}</ol>
+  {extra_block}
   <h2>{t['more_categories'] if kind == 'category' else t['more_bundles']}</h2>
   <ul class="chips">{other_lists}</ul>
 </div>"""
     ld = [bc_ld, json_ld({
         "@context": "https://schema.org", "@type": "ItemList", "name": h1,
-        "itemListElement": [{"@type": "ListItem", "position": i, "url": abs_url(lang, "apps/" + a["id"] + "/"), "name": a["name"]} for i, a in enumerate(list_apps, 1)],
+        "itemListElement": [{"@type": "ListItem", "position": i, "url": abs_url(lang, "apps/" + a["id"] + "/"), "name": a["name"]}
+                            for i, a in enumerate(list(list_apps) + list(extra_apps), 1)],
     })]
     return page(lang, body, title=title, description=intro[:300], path=path, cats=cats, presets=presets, extra_ld=ld)
 
@@ -740,7 +754,11 @@ def llms_txt(apps, cats, presets):
         "- Supported: Windows 10 and Windows 11. winget is the default; Scoop and Chocolatey are optional.",
         "- Output: `WinMate-Install.cmd` (double-click), a `.ps1` file, or a PowerShell snippet to paste.",
         "- One UAC prompt: the script relaunches itself elevated once; apps that refuse elevation (e.g. Spotify) run as the normal user.",
-        "- Bundles: curated sets such as Essentials, Gaming PC, Retro Gaming, Streamer, Developer, Server Admin and Homeserver.",
+        "- Bundles: ready-made sets such as Essentials, Gaming PC, Retro Gaming, Streamer, Developer, Server Admin and Homeserver. "
+        "Every bundle has preselected core apps and an extended list of optional additions.",
+        "- Catalog order: categories alphabetically, apps inside a category ranked best first.",
+        "- Optional version pinning to the versions recorded by a weekly automated check of every package ID.",
+        "- Verification: every script embeds the same engine; its SHA-256 is published and `winmate.ps1 -Verify <script>` checks it.",
         "- Keyboard shortcuts: / search, arrow keys navigate, Space select, S script, ? help.",
         "- Languages: English (/) and German (/de/).",
         "- Inspired by TuxMate (https://tuxmate.com), the bulk app installer for Linux.",
@@ -753,15 +771,18 @@ def llms_txt(apps, cats, presets):
         "",
         "## Data",
         f"- [Full catalog with install commands]({SITE_URL}/llms-full.txt): every app with winget, Scoop and Chocolatey commands",
-        f"- [apps.json]({SITE_URL}/apps.json): machine-readable catalog (id, name, category, package ids, homepage, descriptions)",
+        f"- [apps.json]({SITE_URL}/apps.json): machine-readable catalog (id, name, category, package ids, homepage, descriptions, bundles with core and extended apps)",
+        f"- [Security and verification]({SITE_URL}/security/): what a script does, threat model, how to verify it",
         f"- [Source code]({REPO_URL})",
         "",
         "## Categories",
     ]
-    lines += [f"- [{c['en']['name']}]({SITE_URL}/category/{c['id']}/): {c['en']['intro']}" for c in cats]
+    lines += [f"- [{c['en']['name']}]({SITE_URL}/category/{c['id']}/): {c['en']['intro']}" for c in alpha(cats, 'en')]
     lines += ["", "## Bundles"]
     lines += [f"- [{p['en']['title']}]({SITE_URL}/bundle/{p['id']}/): {p['en']['intro']}" for p in presets]
-    lines += ["", "## Optional", "- Update everything later with `winget upgrade --all`, `scoop update *` or `choco upgrade all -y`.", ""]
+    lines += ["", "## Notes",
+              "- WinMate generates install scripts. Updating everything later: `winget upgrade --all`, `scoop update *` or `choco upgrade all -y`.",
+              "- After an install run the script writes an undo script that removes only the apps that run installed.", ""]
     return "\n".join(lines)
 
 
@@ -832,7 +853,7 @@ def cli_script(apps, presets, engine, engine_sha):
             "winget": a["winget"], "scoop": a.get("scoop"), "choco": a.get("choco"), "noAdmin": bool(a.get("noAdmin")),
             "wv": a["wv"], "cv": a["cv"],
         } for a in apps],
-        "bundles": [{"id": p["id"], "name": p["en"]["name"], "apps": p["apps"]} for p in presets],
+        "bundles": [{"id": p["id"], "name": p["en"]["name"], "apps": p["apps"], "extra": p["extra"]} for p in presets],
     }
     cli = (SRC / "ps" / "cli.ps1").read_text(encoding="utf-8").replace("\r\n", "\n")
     for key, value in {"__WINMATE_VERSION__": WINMATE_VERSION, "__ENGINE_SHA256__": engine_sha, "__SITE_URL__": SITE_URL}.items():
@@ -882,6 +903,7 @@ def write(rel, text):
 
 def build():
     apps, cats, presets, by_cat = load_data()
+    by_id = {a["id"]: a for a in apps}
     if DIST.exists():
         shutil.rmtree(DIST)
     DIST.mkdir()
@@ -922,7 +944,8 @@ def build():
                 title=t["cat_title"].format(name=c[lang]["name"]), h1=t["cat_h1"].format(name=c[lang]["name"]), intro=c[lang]["intro"]))
         for p in presets:
             write(f"{prefix}bundle/{p['id']}/index.html", list_page(
-                lang, kind="bundle", item=p, list_apps=[next(a for a in apps if a["id"] == aid) for aid in p["apps"]],
+                lang, kind="bundle", item=p, list_apps=[by_id[aid] for aid in p["apps"]],
+                extra_apps=[by_id[aid] for aid in p["extra"]],
                 apps=apps, cats=cats, presets=presets, title=f"{p[lang]['title']} | WinMate", h1=p[lang]["title"], intro=p[lang]["intro"]))
     paths += [(f"apps/{a['id']}/", "0.6") for a in apps]
     paths += [(f"category/{c['id']}/", "0.8") for c in cats]

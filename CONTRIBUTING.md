@@ -1,11 +1,11 @@
 # Contributing to WinMate
 
-Thanks for helping! The most valuable contributions are **reports of wrong or outdated packages**, new app
-suggestions, security reviews and tests on real Windows installations.
+The most useful contributions are **reports of wrong or outdated packages**, app suggestions, security reviews
+and tests on real Windows installations.
 
 - Bugs, wrong packages and app requests: [open an issue](https://github.com/baba537/WinMate/issues/new/choose)
-- Security problems: see [SECURITY.md](SECURITY.md) – please report privately
-- Be kind: [Code of Conduct](CODE_OF_CONDUCT.md)
+- Security problems: report them privately, see [SECURITY.md](SECURITY.md)
+- [Code of Conduct](CODE_OF_CONDUCT.md)
 
 ## Development setup
 
@@ -24,7 +24,8 @@ python -m http.server 8000 -d dist    # preview
 
 Read the [catalog policy](docs/catalog-policy.md) first. Then:
 
-1. Edit `data/apps.json` (format in the [README](README.md#adding-or-fixing-an-app)).
+1. Edit `data/apps.json` (format in the [README](README.md#adding-or-fixing-an-app)). The position inside a
+   category is the ranking, best first.
 2. `python tools/validate_packages.py --elevation` – must report 0 errors.
 3. `python tools/fetch_icons.py <id>` and check the icon on the page.
 4. `python build.py && python tools/check_site.py`.
