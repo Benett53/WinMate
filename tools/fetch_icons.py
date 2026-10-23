@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 ICON_DIR = ROOT / "src" / "icons"
-UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) WinMate-icon-fetcher (+https://github.com/baba537/WinMate)"}
+UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) WinMate-icon-fetcher (+https://github.com/Benett53/WinMate)"}
 SIZE = 128
 
 

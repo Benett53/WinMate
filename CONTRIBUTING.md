@@ -3,7 +3,7 @@
 The most useful contributions are **reports of wrong or outdated packages**, app suggestions, security reviews
 and tests on real Windows installations.
 
-- Bugs, wrong packages and app requests: [open an issue](https://github.com/baba537/WinMate/issues/new/choose)
+- Bugs, wrong packages and app requests: [open an issue](https://github.com/Benett53/WinMate/issues/new/choose)
 - Security problems: report them privately, see [SECURITY.md](SECURITY.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 

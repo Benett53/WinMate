@@ -4,7 +4,7 @@ labels: ["app-request"]
 body:
   - type: markdown
     attributes:
-      value: Please check the [catalog policy](https://github.com/baba537/WinMate/blob/main/docs/catalog-policy.md) first.
+      value: Please check the [catalog policy](https://github.com/Benett53/WinMate/blob/main/docs/catalog-policy.md) first.
   - type: input
     id: name
     attributes:

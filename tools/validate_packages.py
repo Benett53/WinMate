@@ -28,7 +28,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE = ROOT / ".cache"
-UA = {"User-Agent": "WinMate-validator (+https://github.com/baba537/WinMate)"}
+UA = {"User-Agent": "WinMate-validator (+https://github.com/Benett53/WinMate)"}
 BUCKETS = {
     "main": "ScoopInstaller/Main", "extras": "ScoopInstaller/Extras", "versions": "ScoopInstaller/Versions",
     "java": "ScoopInstaller/Java", "nonportable": "ScoopInstaller/Nonportable", "games": "Calinou/scoop-games",

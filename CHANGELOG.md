@@ -70,6 +70,6 @@ versions follow [Semantic Versioning](https://semver.org/). The current version 
 
 - First version: 181 apps, script download as ZIP.
 
-[Unreleased]: https://github.com/baba537/WinMate/compare/v2.3.0...HEAD
-[2.3.0]: https://github.com/baba537/WinMate/releases/tag/v2.3.0
-[2.2.0]: https://github.com/baba537/WinMate/releases/tag/v2.2.0
+[Unreleased]: https://github.com/Benett53/WinMate/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/Benett53/WinMate/releases/tag/v2.3.0
+[2.2.0]: https://github.com/Benett53/WinMate/releases/tag/v2.2.0

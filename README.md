@@ -7,8 +7,8 @@
 WinMate builds a single install script from a catalog of 373 checked Windows apps.<br>
 Select apps, choose a package manager, read the script, run it.
 
-[![CI](https://github.com/baba537/WinMate/actions/workflows/ci.yml/badge.svg)](https://github.com/baba537/WinMate/actions/workflows/ci.yml)
-[![Catalog check](https://github.com/baba537/WinMate/actions/workflows/catalog-check.yml/badge.svg)](https://github.com/baba537/WinMate/actions/workflows/catalog-check.yml)
+[![CI](https://github.com/Benett53/WinMate/actions/workflows/ci.yml/badge.svg)](https://github.com/Benett53/WinMate/actions/workflows/ci.yml)
+[![Catalog check](https://github.com/Benett53/WinMate/actions/workflows/catalog-check.yml/badge.svg)](https://github.com/Benett53/WinMate/actions/workflows/catalog-check.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 ![Apps](https://img.shields.io/badge/apps-373-orange)
 ![Languages](https://img.shields.io/badge/lang-EN%20%C2%B7%20DE-lightgrey)
@@ -52,7 +52,7 @@ Select apps, choose a package manager, read the script, run it.
 ```
 
 The catalog is embedded in the file, so nothing is downloaded from WinMate and nothing is sent anywhere.
-Download it from the [latest release](https://github.com/baba537/WinMate/releases/latest), which carries a build
+Download it from the [latest release](https://github.com/Benett53/WinMate/releases/latest), which carries a build
 provenance attestation, or from the website at `/winmate.ps1`.
 
 ## Trust and transparency
@@ -70,7 +70,7 @@ A tool that installs software with administrator rights has to be verifiable.
 | Any data collected? | No telemetry, no cookies, no accounts. The selection stays in the browser. See the [privacy page](https://winmate.baba537.workers.dev/privacy/). |
 
 **Limits:** scripts are not Authenticode-signed, there has been no independent security audit, and the project
-has a single maintainer and was written with AI assistance. Reviews and bug reports are welcome; see
+has a single maintainer. Reviews and bug reports are welcome; see
 [SECURITY.md](SECURITY.md) and [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## The single administrator prompt
@@ -157,10 +157,12 @@ code was copied.
 
 ## Disclaimer
 
-WinMate was written with the help of Claude AI by Anthropic. It is not affiliated with Microsoft or with any
-listed software vendor. All product names, logos and trademarks belong to their respective owners. Packages come
-from the winget, Scoop and Chocolatey communities. Review a script before running it.
+WinMate is not affiliated with Microsoft or with any listed software vendor. All product names, logos and
+trademarks belong to their respective owners. Packages come from the winget, Scoop and Chocolatey communities.
+Review a script before running it.
 
 ## License
 
 MIT, see [LICENSE](LICENSE).
+
+Parts of this project were created with AI assistance.

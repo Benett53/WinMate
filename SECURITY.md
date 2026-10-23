@@ -7,11 +7,11 @@ A user-facing version lives at <https://winmate.baba537.workers.dev/security/>.
 ## Reporting a vulnerability
 
 Please **do not open a public issue**. Report privately via
-[GitHub security advisories](https://github.com/baba537/WinMate/security/advisories/new).
+[GitHub security advisories](https://github.com/Benett53/WinMate/security/advisories/new).
 
 - Reports receive a first response within 7 days.
 - Confirmed issues are fixed in a new release; the advisory is published after the fix, with credit on request.
-- Wrong or outdated package IDs are not security issues. Please use the normal [issue tracker](https://github.com/baba537/WinMate/issues).
+- Wrong or outdated package IDs are not security issues. Please use the normal [issue tracker](https://github.com/Benett53/WinMate/issues).
 
 Supported: only the latest release and the live website.
 
@@ -38,7 +38,7 @@ every GitHub release.
 - `winmate.ps1 -Verify <script>` compares the engine block with the hash and prints the configuration.
 - Release files (`winmate.ps1`, `engine.ps1`, site zip, `SHA256SUMS`) are built by the public
   [release workflow](.github/workflows/release.yml) and carry a build provenance attestation:
-  `gh attestation verify winmate.ps1 --repo baba537/WinMate`
+  `gh attestation verify winmate.ps1 --repo Benett53/WinMate`
 - The website build is reproducible: dates come from the last commit, so rebuilding a commit produces identical
   files. CI builds twice and fails if the outputs differ.
 
@@ -67,5 +67,5 @@ every GitHub release.
 
 - Scripts are generated per selection in the browser and are therefore **not Authenticode-signed**.
 - **No independent security audit** has been performed. Reviews are welcome.
-- Single maintainer; parts of the project were written with AI assistance. All code is public for review.
+- Single maintainer. All code is public for review.
 - Not an enterprise deployment tool: no central management, offline mirror or compliance reporting.

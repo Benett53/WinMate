@@ -79,7 +79,7 @@ T = {
 <dl class="ids"><dt>Current version</dt><dd>{version}</dd><dt>Engine SHA-256</dt><dd><code>{sha}</code></dd><dt>Built from commit</dt><dd><a href="{commit_url}" rel="noopener"><code>{commit}</code></a></dd></dl>
 <p>Every generated script consists of a short configuration block with the selected apps and the engine, which is identical in all scripts. To confirm that the engine is unchanged:</p>
 <ol>
-<li>Download <code>winmate.ps1</code> from the <a href="{repo}/releases/latest" rel="noopener">latest GitHub release</a>. Releases are built by public GitHub Actions and carry a build provenance attestation: <code>gh attestation verify winmate.ps1 --repo baba537/WinMate</code></li>
+<li>Download <code>winmate.ps1</code> from the <a href="{repo}/releases/latest" rel="noopener">latest GitHub release</a>. Releases are built by public GitHub Actions and carry a build provenance attestation: <code>gh attestation verify winmate.ps1 --repo Benett53/WinMate</code></li>
 <li>Run <code>.\\winmate.ps1 -Verify .\\WinMate-Install.cmd</code>. It prints the apps the script installs and reports <b>OK</b> only if the engine matches the published hash.</li>
 <li>Or compare the engine block manually against <a href="{repo}/blob/main/src/ps/engine.ps1" rel="noopener">src/ps/engine.ps1</a>. The site is built reproducibly from the repository, so the result can be rebuilt and compared; <code>build-info.json</code> lists the hashes.</li>
 </ol></section>
@@ -103,7 +103,7 @@ T = {
 <ul>
 <li><b>No Authenticode signature.</b> Scripts are generated in the browser for one specific selection and therefore cannot be code-signed. Release files carry GitHub build provenance instead, and the engine hash is published.</li>
 <li><b>No independent security audit.</b> The code is small and readable; reviews and reports are welcome.</li>
-<li><b>Single maintainer, AI-assisted development.</b> Everything is public and can be checked.</li>
+<li><b>Single maintainer.</b> Everything is public and can be checked.</li>
 <li><b>Not a deployment or management tool.</b> WinMate generates install scripts. There is no central management, no offline mirror and no compliance reporting.</li>
 </ul></section>
 <section id="report"><h2>Reporting a vulnerability</h2>
@@ -314,7 +314,7 @@ T = {
 <dl class="ids"><dt>Aktuelle Version</dt><dd>{version}</dd><dt>Engine-SHA-256</dt><dd><code>{sha}</code></dd><dt>Gebaut aus Commit</dt><dd><a href="{commit_url}" rel="noopener"><code>{commit}</code></a></dd></dl>
 <p>Jedes erzeugte Skript besteht aus einem kurzen Konfigurationsblock mit den gewählten Apps und der Engine, die in allen Skripten identisch ist. So lässt sich prüfen, dass die Engine unverändert ist:</p>
 <ol>
-<li><code>winmate.ps1</code> aus dem <a href="{repo}/releases/latest" rel="noopener">aktuellen GitHub-Release</a> herunterladen. Releases werden von öffentlichen GitHub Actions gebaut und tragen einen Herkunftsnachweis: <code>gh attestation verify winmate.ps1 --repo baba537/WinMate</code></li>
+<li><code>winmate.ps1</code> aus dem <a href="{repo}/releases/latest" rel="noopener">aktuellen GitHub-Release</a> herunterladen. Releases werden von öffentlichen GitHub Actions gebaut und tragen einen Herkunftsnachweis: <code>gh attestation verify winmate.ps1 --repo Benett53/WinMate</code></li>
 <li><code>.\\winmate.ps1 -Verify .\\WinMate-Install.cmd</code> ausführen. Der Befehl listet die Apps auf, die das Skript installiert, und meldet nur dann <b>OK</b>, wenn die Engine dem veröffentlichten Hash entspricht.</li>
 <li>Alternativ den Engine-Block von Hand mit <a href="{repo}/blob/main/src/ps/engine.ps1" rel="noopener">src/ps/engine.ps1</a> vergleichen. Die Seite wird reproduzierbar aus dem Repository gebaut, das Ergebnis lässt sich also nachbauen und vergleichen; die Hashes stehen in <code>build-info.json</code>.</li>
 </ol></section>
@@ -338,7 +338,7 @@ T = {
 <ul>
 <li><b>Keine Authenticode-Signatur.</b> Skripte entstehen im Browser für eine bestimmte Auswahl und lassen sich deshalb nicht signieren. Release-Dateien tragen stattdessen einen GitHub-Herkunftsnachweis, und der Engine-Hash ist veröffentlicht.</li>
 <li><b>Kein unabhängiges Sicherheitsaudit.</b> Der Code ist klein und lesbar; Reviews und Meldungen sind willkommen.</li>
-<li><b>Ein Maintainer, KI-gestützte Entwicklung.</b> Alles ist öffentlich und damit nachprüfbar.</li>
+<li><b>Ein Maintainer.</b> Alles ist öffentlich und damit nachprüfbar.</li>
 <li><b>Kein Deployment- oder Verwaltungswerkzeug.</b> WinMate erzeugt Installationsskripte. Es gibt keine zentrale Verwaltung, keinen Offline-Spiegel und kein Compliance-Reporting.</li>
 </ul></section>
 <section id="report"><h2>Sicherheitslücken melden</h2>

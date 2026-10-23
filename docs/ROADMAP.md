@@ -1,6 +1,6 @@
 # Roadmap
 
-Plans change with feedback. Suggestions belong in the [issue tracker](https://github.com/baba537/WinMate/issues).
+Plans change with feedback. Suggestions belong in the [issue tracker](https://github.com/Benett53/WinMate/issues).
 
 ## Done
 
