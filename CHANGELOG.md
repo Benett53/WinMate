@@ -5,6 +5,13 @@ versions follow [Semantic Versioning](https://semver.org/). The current version 
 
 ## [Unreleased]
 
+### Fixed
+- A link such as `?pm=constructor`, or an imported profile naming `constructor` as package manager or
+  bundle, was taken for a known id and stopped the page script; from a profile the broken state was saved
+  and the page stayed broken until the site data was cleared. Only ids from the catalog are accepted now.
+- Engine: with an apostrophe in the path of the temporary folder (a profile folder such as `O'Brien`),
+  the script for the administrator part did not parse and every app was reported as failed.
+
 ## [2.3.0] - 2026-09-20
 
 ### Added
