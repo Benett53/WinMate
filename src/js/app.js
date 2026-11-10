@@ -6,7 +6,14 @@
   var SITE_URL = "__SITE_URL__";
   var ENGINE_SHA256 = "__ENGINE_SHA256__";
   var VERSION = "__WINMATE_VERSION__";
-  var PM_LABEL = { winget: "winget", scoop: "Scoop", choco: "Chocolatey" };
+  // Lookup tables have no prototype. Ids arrive from links, saved state and imported
+  // profiles, and "constructor" or "toString" must not pass as a known one.
+  function table(entries) {
+    var t = Object.create(null);
+    Object.keys(entries || {}).forEach(function (k) { t[k] = entries[k]; });
+    return t;
+  }
+  var PM_LABEL = table({ winget: "winget", scoop: "Scoop", choco: "Chocolatey" });
   var PMS = ["winget", "scoop", "choco"];
   var STORE_KEY = "wm-selection-v3";
 
@@ -90,7 +97,7 @@
 
   var L = JSON.parse($("#wm-i18n").textContent);
   var cards = $$(".card", catalog);
-  var byId = {};
+  var byId = table();
   cards.forEach(function (card) {
     card._check = card.querySelector(".card-check");
     card._via = card.querySelector(".via");
@@ -103,7 +110,7 @@
     return (value || "").split(",").filter(function (id) { return id && byId[id]; });
   }
 
-  var bundles = {};
+  var bundles = table();
   $$("[data-bundle]").forEach(function (tile) {
     bundles[tile.dataset.bundle] = {
       id: tile.dataset.bundle, tile: tile, name: tile.dataset.name, title: tile.dataset.title, intro: tile.dataset.intro,

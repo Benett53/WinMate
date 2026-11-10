@@ -266,7 +266,9 @@
 
     function New-PhaseScript([string]$Phase, [string]$ResultFile) {
         $file = Join-Path $env:TEMP ("winmate-" + [guid]::NewGuid().ToString('N') + '.ps1')
-        $body = "& {" + $Self.ToString() + "} -Phase '$Phase' -ResultFile '$ResultFile' -RunId '$RunId'"
+        # The result file lies below %TEMP%, and a profile folder may contain an apostrophe (O'Brien).
+        $quoted = $ResultFile.Replace("'", "''")
+        $body = "& {" + $Self.ToString() + "} -Phase '$Phase' -ResultFile '$quoted' -RunId '$RunId'"
         [IO.File]::WriteAllText($file, $body, (New-Object Text.UTF8Encoding $true))
         return $file
     }
